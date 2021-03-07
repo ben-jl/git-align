@@ -1,2 +1,5 @@
+import qualified GitParsingSpec as GPS
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = do
+    GPS.completeGitParsingSpec
