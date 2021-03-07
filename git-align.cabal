@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9e3535be3b5785d1feedb45038bdb137ff9daac63eea14ee380122d6c472ca67
+-- hash: 88e5120a59db4913cf6e168ec31d5d307c6b13f65feb34cdd6e4c4218ea1a98a
 
 name:           git-align
 version:        0.1.0.0
@@ -27,8 +27,8 @@ source-repository head
 
 library
   exposed-modules:
-      GitTypes
-      TFSTypes
+      Git.Types
+      TFS.Types
   other-modules:
       Paths_git_align
   hs-source-dirs:
