@@ -1,4 +1,9 @@
-module Git.Types where
+module Git.Types (
+        GitObjectType(..), 
+        GitTreeObjectElement(..), 
+        GitTreeObject(..),
+        GitCommitObject(..)
+    ) where
 
 import Data.Text (Text)
 import Data.Word (Word16)
@@ -8,6 +13,8 @@ type GitUser = Text
 
 data GitConnectionCfg = GitConnectionCfg GitApiKey GitUser deriving (Show, Eq)
 
+data GitObjectType = Blob | Tree deriving (Show,Eq)
+
 data GitRepository = GitRepository {
     gitRepoLocation :: Text,
     gitRepoName :: Text
@@ -16,8 +23,8 @@ data GitRepository = GitRepository {
 data GitBlob = GitBlob { gitBlobSha256 :: Text, gitBlobContents :: [Word16] } deriving (Show, Eq)
 
 data GitTreeObjectElement = GitTreeObjectElement {
-    gitTreeObjElementMode :: Int,
-    gitTreeObjElementType :: Text,
+    gitTreeObjElementMode :: [Char],
+    gitTreeObjElementType :: GitObjectType,
     gitTreeObjElementSha256 :: Text,
     gitTreeObjElementName :: Text
 } deriving (Show, Eq)
