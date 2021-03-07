@@ -1,0 +1,38 @@
+name: git-align
+version: 0.1.0.0
+github: 'https://github.com/ben-jl/git-align'
+license: BSD3
+author: Ben LeValley
+maintainer: ben.levalley@gmail.com
+copyright: 2021 Ben LeValley
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+description: >-
+  Please see the README on GitHub at
+  <https://github.com/ben-jl/git-align#readme>
+dependencies:
+  - base >= 4.7 && < 5
+  - text
+library:
+  source-dirs: src
+executables:
+  git-align-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - '-threaded'
+      - '-rtsopts'
+      - '-with-rtsopts=-N'
+    dependencies:
+      - git-align
+tests:
+  git-align-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - '-threaded'
+      - '-rtsopts'
+      - '-with-rtsopts=-N'
+    dependencies:
+      - git-align

@@ -1,0 +1,20 @@
+cradle:
+  multi:
+    - path: ./Setup.hs
+      config:
+        cradle: 
+          none:
+    - path: ./.stack-work
+      config:
+        cradle:
+          none:
+    - path: ./
+      config:
+        cradle:
+          stack:
+            - path: ./src
+              component: "git-align:lib"
+            - path: ./test
+              component: "git-align:test:git-align-test"
+            - path: ./app
+              component: "git-align:exe:git-align-exe"

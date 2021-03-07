@@ -1,0 +1,14 @@
+{
+    "version":"2.0.0",
+    "tasks": [
+        {
+            "command": "stack build && stack test",
+            "label": "stack build",
+            "group":{
+                "kind": "build",
+                "isDefault": true
+            },
+            "type":"shell"
+        }
+    ]
+}
