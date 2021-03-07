@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 88e5120a59db4913cf6e168ec31d5d307c6b13f65feb34cdd6e4c4218ea1a98a
+-- hash: a4cb5f560688ad203bef299e4435d0166a9a029aa8b50b726418e6f3d4c826e9
 
 name:           git-align
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Git.Parsing
       Git.Types
       TFS.Types
   other-modules:
@@ -34,8 +35,10 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
-    , text
+      HUnit >=1.6.0.0 && <1.7
+    , base >=4.7 && <5
+    , parsec >=3.1.5.0 && <3.2
+    , text >=1.2.2.0 && <1.3
   default-language: Haskell2010
 
 executable git-align-exe
@@ -46,21 +49,26 @@ executable git-align-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      HUnit >=1.6.0.0 && <1.7
+    , base >=4.7 && <5
     , git-align
-    , text
+    , parsec >=3.1.5.0 && <3.2
+    , text >=1.2.2.0 && <1.3
   default-language: Haskell2010
 
 test-suite git-align-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      GitParsingSpec
       Paths_git_align
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      HUnit >=1.6.0.0 && <1.7
+    , base >=4.7 && <5
     , git-align
-    , text
+    , parsec >=3.1.5.0 && <3.2
+    , text >=1.2.2.0 && <1.3
   default-language: Haskell2010
