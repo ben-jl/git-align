@@ -50,7 +50,7 @@ parseTreeSpec :: H.Test
 parseTreeSpec = 
     let sha = "47c6340d6459e05787f644c2447d2595f5d3a54b"
         input = "100644 blob a906cb2a4a904a152e80877d4088654daad0c859 README.md\n040000 tree 99f1a6d12cb4b6f19c8655fca46c3ecf317074e0      lib"
-        expected = GitTreeObject sha [
+        expected = GitTreeObjectT sha [
             GitTreeObjectElement "100644" Blob "a906cb2a4a904a152e80877d4088654daad0c859" "README.md",
             GitTreeObjectElement "040000" Tree "99f1a6d12cb4b6f19c8655fca46c3ecf317074e0" "lib"
             ]
@@ -63,7 +63,7 @@ parseCommitSpec :: H.Test
 parseCommitSpec = 
     let sha = "47c6340d6459e05787f644c2447d2595f5d3a54b"
         result = P.runParser parseCommitObject () "test data" commitMsg
-        expected = GitCommitObject sha "d8329fc1cc938780ffdd9f94e0d364e0ea74f579" "Scott Chacon" "Scott Chacon" "First commit"
+        expected = GitCommitObjectT sha "d8329fc1cc938780ffdd9f94e0d364e0ea74f579" "Scott Chacon" "Scott Chacon" "First commit"
     in
         either (H.TestCase . H.assertFailure . show) (\x -> expected H.~=? x sha) result
 
@@ -71,7 +71,7 @@ parseCommitSpec2 :: H.Test
 parseCommitSpec2 =
     let sha = "47c6340d6459e05787f644c2447d2595f5d3a54b"
         result = P.runParser parseCommitObject () "test data" commitMsg2
-        expected = GitCommitObject sha "d8329fc1cc938780ffdd9f94e0d364e0ea74f579" "Scott Chacon" "Scott Chacon" "First commit\n1234 %$^"
+        expected = GitCommitObjectT sha "d8329fc1cc938780ffdd9f94e0d364e0ea74f579" "Scott Chacon" "Scott Chacon" "First commit\n1234 %$^"
     in
         either (H.TestCase . H.assertFailure . show) (\x -> expected H.~=? x sha) result
 

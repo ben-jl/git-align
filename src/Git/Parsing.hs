@@ -30,7 +30,7 @@ parseTreeElementObject = do
 parseTreeObject :: GitParser (Text -> GitTreeObject)
 parseTreeObject = do
     elems <- P.sepBy1 parseTreeElementObject P.endOfLine 
-    return $ \x -> GitTreeObject x elems
+    return $ \x -> GitTreeObjectT x elems
 
 parseCommitObject :: GitParser (Text -> GitCommitObject)
 parseCommitObject = do
@@ -56,6 +56,6 @@ parseCommitObject = do
     P.satisfy  (not . isAlphaNum)
     message <- fromString <$> P.many1 P.anyChar
     P.eof 
-    return $ \x -> GitCommitObject x (fromString gTree) (fst auth) (fst committer) message  
+    return $ \x -> GitCommitObjectT x (fromString gTree) (fst auth) (fst committer) message  
 
 
