@@ -1,0 +1,25 @@
+cabal-version: 1.12
+
+name:           git-align-vis
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/ben-jl/git-align#readme>
+homepage:       https://github.com/https://github.com/ben-jl/git-align#readme
+bug-reports:    https://github.com/https://github.com/ben-jl/git-align/issues
+author:         Ben LeValley
+maintainer:     ben.levalley@gmail.com
+copyright:      2021 Ben LeValley
+build-type:     Simple
+
+
+source-repository head
+  type: git
+  location: https://github.com/https://github.com/ben-jl/git-align/git-align
+
+library
+  exposed-modules:
+      Visualization
+  build-depends: base >= 4.10 && < 5
+                , git-align
+  hs-source-dirs: ., ./src
+  default-language: Haskell2010
+  
