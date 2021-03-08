@@ -27,5 +27,3 @@ data Commit = CommitT {
 
 
 data Contributor = ContributerT ObjectName Email TimestampUTC OffsetUTC
-
-
