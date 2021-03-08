@@ -12,7 +12,7 @@
     "haskell.hlintOn": true,
     "haskell.indentationRules.enabled": true,
     "haskell.languageServerVariant": "haskell-language-server",
-    "haskell.trace.server": "messages",
+
     "haskell.serverExecutablePath": "haskell-language-server-8.10.4",
 
     "[haskell]": {

@@ -16,4 +16,10 @@ cradle:
       config:
         cradle:
           stack:
-            stackYaml: stack.yaml
+            components:
+              - path: ./git-align
+                component: git-align:lib
+              - path: ./git-align/test
+                component: git-align:test:test-git-align
+              - path: ./git-align-gis
+                component: git-align-vis:lib

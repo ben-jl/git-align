@@ -19,17 +19,64 @@ library
       Gitalign
   build-depends: base >= 4.10 && < 5
     , text >= 1.2.0.0 && < 1.3
-    , unordered-containers
-    
+    , unordered-containers >= 0.2.10 && < 0.3
+    , hashable >=1.3.0.0 && < 1.4
+    , bytestring >= 0.10.12.0 && < 0.11
+    , call-stack
+    , HUnit
   other-modules: Gitalign.Types
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
+  default-extensions: 
+    EmptyCase
+    , FlexibleContexts
+    , FlexibleInstances
+    , InstanceSigs
+    , MultiParamTypeClasses
+    , LambdaCase
+    , MultiWayIf
+    , NamedFieldPuns
+    , TupleSections
+    , BangPatterns
+    , KindSignatures
+    , TypeOperators
+    , OverloadedStrings
+    , ScopedTypeVariables
+    , TypeApplications
+    , ConstraintKinds
+    , RankNTypes
 
 Test-Suite test-git-align
   type: exitcode-stdio-1.0
   main-is: Spec.hs
-  hs-source-dirs: ./test
+  other-modules:
+    Test.ConstructorSpec
+  hs-source-dirs: test/, test/Test/
   build-depends:
     base >= 4.10 && < 5
     , git-align
+    , text >= 1.2.0.0 && < 1.3
+    , unordered-containers >= 0.2.10 && < 0.3
+    , hashable >=1.3.0.0 && < 1.4
+    , bytestring >= 0.10.12.0 && < 0.11
+    , HUnit
+    , call-stack
   default-language: Haskell2010
+  default-extensions: 
+    EmptyCase
+    , FlexibleContexts
+    , FlexibleInstances
+    , InstanceSigs
+    , MultiParamTypeClasses
+    , LambdaCase
+    , MultiWayIf
+    , NamedFieldPuns
+    , TupleSections
+    , BangPatterns
+    , KindSignatures
+    , TypeOperators
+    , OverloadedStrings
+    , ScopedTypeVariables
+    , TypeApplications
+    , ConstraintKinds
+    , RankNTypes   
