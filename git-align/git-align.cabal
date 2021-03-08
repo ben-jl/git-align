@@ -18,6 +18,9 @@ library
   exposed-modules:
       Gitalign
   build-depends: base >= 4.10 && < 5
+    , text >= 1.2.0.0 && < 1.3
+    , unordered-containers
+    
   other-modules: Gitalign.Types
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
@@ -27,6 +30,6 @@ Test-Suite test-git-align
   main-is: Spec.hs
   hs-source-dirs: ./test
   build-depends:
-    base
+    base >= 4.10 && < 5
     , git-align
   default-language: Haskell2010
