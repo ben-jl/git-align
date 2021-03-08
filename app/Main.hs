@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import TFSTypes
+import TFS.Types
 
 main :: IO ()
 main = print (TFSConnectionCfg "api-key" "username")

@@ -1,6 +1,10 @@
 cradle:
   multi:
-    - path: ./Setup.hs
+    - path: ./git-align/Setup.hs
+      config:
+        cradle: 
+          none:
+    - path: ./git-align-vis/Setup.hs
       config:
         cradle: 
           none:
@@ -12,9 +16,4 @@ cradle:
       config:
         cradle:
           stack:
-            - path: ./src
-              component: "git-align:lib"
-            - path: ./test
-              component: "git-align:test:git-align-test"
-            - path: ./app
-              component: "git-align:exe:git-align-exe"
+            stackYaml: stack.yaml
