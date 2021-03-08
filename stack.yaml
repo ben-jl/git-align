@@ -1,7 +1,8 @@
 resolver: lts-17.5
 
 packages:
-- .
+- ./git-align
+- ./git-align-vis
 
 ghc-options:
   $everything: -haddock

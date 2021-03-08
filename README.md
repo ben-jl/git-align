@@ -1,3 +1,3 @@
 # git-align
 
-Git/TFS bridge
+Git library

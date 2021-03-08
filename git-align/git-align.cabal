@@ -1,0 +1,32 @@
+cabal-version: 1.12
+
+name:           git-align
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/ben-jl/git-align#readme>
+homepage:       https://github.com/https://github.com/ben-jl/git-align#readme
+bug-reports:    https://github.com/https://github.com/ben-jl/git-align/issues
+author:         Ben LeValley
+maintainer:     ben.levalley@gmail.com
+copyright:      2021 Ben LeValley
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/https://github.com/ben-jl/git-align/git-align-core
+
+library
+  exposed-modules:
+      Gitalign
+  build-depends: base >= 4.10 && < 5
+  other-modules: Gitalign.Types
+  hs-source-dirs: ., ./Gitalign
+  default-language: Haskell2010
+
+Test-Suite test-git-align
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs: ./test
+  build-depends:
+    base
+    , git-align
+  default-language: Haskell2010
