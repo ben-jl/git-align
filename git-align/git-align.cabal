@@ -24,6 +24,8 @@ library
     , bytestring >= 0.10.12.0 && < 0.11
     , call-stack
     , HUnit
+    , containers
+    , graphite
   other-modules: Gitalign.Types
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
@@ -61,6 +63,8 @@ Test-Suite test-git-align
     , bytestring >= 0.10.12.0 && < 0.11
     , HUnit
     , call-stack
+    , containers
+    , graphite
   default-language: Haskell2010
   default-extensions: 
     EmptyCase
