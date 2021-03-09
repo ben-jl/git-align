@@ -5,20 +5,25 @@ import Data.Text
 import Data.Function ((&))
 import Gitalign 
 import qualified Data.HashMap.Strict as HM
+import Data.Functor
+import Data.Maybe
 
 
 constructorSpec :: IO ()
 constructorSpec = 
     let testList = H.TestList [
-            "Creates graph from list" & createsGraphFromList
-            , "Creates graph from list 2" & createsGraphFromList
+            "Creates graph from list" H.~: createsGraphFromList
             ] :: H.Test
         in
     H.runTestTTAndExit testList
         
     
-createsGraphFromList :: String -> Test
-createsGraphFromList l = TestLabel l $ 
-    let foo = [BlobT (SHA "foobar") (SHAOnly (SHA "foobar"))] :: [Blob] in 
-    HM.lookup (BlobT (SHA "foobar") (SHAOnly (SHA "foobar"))) (contents $ objectRepoFromList foo) H.~=? Just [BlobT (SHA "foobar") (SHAOnly (SHA "foobar"))]
+createsGraphFromList :: H.Test
+createsGraphFromList = let input = [BlobT (SHA "foobar") (FullValue "cabaret"), BlobT (SHA "foobar") (FullValue "bar"), BlobT (SHA "cape") (FullValue "car")] 
+                           hashmap = unRepo (objectRepoFromList input) in 
+    TestList [
+         maybe 0 Prelude.length (HM.lookup (SHA "foobar") hashmap) H.~=? 2,
+         HM.lookup (SHA "cape") hashmap H.~=? Just [BlobT (SHA "cape") (FullValue "car")]
+
+    ] 
 

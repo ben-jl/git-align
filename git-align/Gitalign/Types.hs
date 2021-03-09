@@ -7,8 +7,11 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable as H
 import qualified Data.ByteString as B
+import Data.String (IsString(..))
 
 newtype SHA = SHA B.ByteString deriving (Show, Eq)
+instance IsString SHA where
+    fromString = SHA . fromString
 
 data EnrichedBy a = SHAOnly SHA | FullValue a deriving (Show, Eq)
 
@@ -51,14 +54,34 @@ instance Hashable SHA where
 unwrap :: SHA -> B.ByteString
 unwrap (SHA x) = x
 
-newtype ObjectRepository a = ObjectRepositoryT { contents :: RetrievableBySHA a => HM.HashMap a [a] }
+data GitObject = CommitObj Commit | TreeObj Tree | BlobObj Blob
+instance (RetrievableBySHA GitObject) where 
+    sha o = case o of
+                CommitObj comm -> sha comm
+                TreeObj tree -> sha tree
+                BlobObj blob -> sha blob
 
-objectRepoFromList :: (Hashable a, Eq a, RetrievableBySHA a) => [a] -> ObjectRepository a
+data DAG = Head | Node Commit [DAG] deriving (Show, Eq)
+
+                            
+newtype Repository = RepositoryT { traceBack :: Int -> Commit -> DAG }
+fromObjectRepo :: ObjectRepository GitObject -> Repository
+fromObjectRepo r = let resolveRepo hm acc n c = 
+                        case n of 
+                            0 -> acc
+                            n -> resolveRepo hm (Node c [acc]) (n-1) $ CommitT "foo" undefined undefined undefined undefined undefined  in
+                   RepositoryT $ resolveRepo (unRepo r) Head
+
+newtype ObjectRepository a = ObjectRepositoryT { unRepo :: RetrievableBySHA a => HM.HashMap SHA [a] }
+
+objectRepoFromList :: (RetrievableBySHA a) => [a] -> ObjectRepository a
 objectRepoFromList l = 
-    let objectRepoFromList' :: (Hashable a, Eq a, RetrievableBySHA a) => [a] -> HM.HashMap a [a] -> HM.HashMap a [a]
+    let 
         objectRepoFromList' [] acc = acc
         objectRepoFromList' (x:xs) acc 
-            = let updatedMap = case HM.lookup x acc of
-                                Just curr -> HM.adjust (x :) x acc
-                                Nothing -> HM.insert x [x] acc in objectRepoFromList' xs updatedMap in
-    ObjectRepositoryT $ objectRepoFromList' l HM.empty
+            = let updatedMap = 
+                    case HM.lookup (sha x) acc of
+                        Just curr -> HM.adjust (\_ -> x:curr) (sha x) acc
+                        Nothing -> HM.insert (sha x) [x] acc 
+               in objectRepoFromList' xs updatedMap
+    in ObjectRepositoryT $ objectRepoFromList' l HM.empty
