@@ -1,19 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Gitalign.Types 
-
+    (
+        Repository(..)
+        , Commit(..)
+        , fromCommitList
+        , numParents
+        , numChildren
+        , hasParent
+        , commitCount
+        , peekLatestCommit
+    )
 where
 
-import qualified Data.Graph.Types as G
-import qualified Data.Graph.DGraph as D
-import qualified Data.Graph.Visualize as V
-import qualified Data.Hashable as H
+import Prelude (Bool, Eq ((/=), (==)), Int, Maybe (Just, Nothing),
+                Ord (compare, (<=)), Show, String, length, map,
+                maximum, return, ($), (.), (<$>), (<*>))
+import Data.Graph.Types qualified as  G 
+import Data.Graph.DGraph qualified as D
+import Data.Hashable qualified as H
 import Data.Text ( Text ) 
 import Data.String (IsString(fromString))
-import Control.Monad (ap)
-import qualified Data.Graph.Connectivity as GC
+import Data.Graph.Connectivity qualified as GC
+import Test.QuickCheck qualified as Q
+import Data.List qualified
 
-newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving Show
-data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving Show
+newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving stock (Show)
+data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving stock (Show)
 instance H.Hashable Commit where
     hashWithSalt s = H.hashWithSalt s . commitSHA
 
@@ -25,9 +37,6 @@ instance Eq Commit where
 
 instance IsString Commit where
     fromString s = CommitT (fromString s) [] 
-
-prettyPrint :: Repository -> Text
-prettyPrint r = fromString $ D.prettyPrint (unRepo r)
 
 hasParent :: Repository -> Commit -> Commit -> Bool
 hasParent r = GC.areConnected (unRepo r)
@@ -54,3 +63,16 @@ fromCommitList cts =
             [] -> G.insertVertex c acc
             cps -> G.insertEdgePairs ((c,) <$> cps) acc)
     in fromCommitList' cts G.empty
+
+instance Q.Arbitrary Repository where
+    arbitrary = do
+        strList <- Q.listOf (Q.arbitrary `Q.suchThat` (\c -> length c <= 8) :: Q.Gen String) 
+        let subseqs = Data.List.take (length strList) (Data.List.permutations strList)
+        let commits = Data.List.zipWith (\x y -> CommitT (fromString x) (fromString <$> y)) strList subseqs
+        return $ fromCommitList commits
+
+instance Q.Arbitrary Commit where
+    arbitrary = do
+        textList <- Q.listOf (Q.arbitrary `Q.suchThat` (/=) []) `Q.suchThat` (\c -> length c <= 5) :: Q.Gen [String]
+        currSha <- Q.arbitrary `Q.suchThat` (/=) [] :: Q.Gen String
+        return $ CommitT (fromString currSha) (CommitT <$> map fromString textList <*> [])

@@ -4,8 +4,8 @@ module Gitalign
     ) where
 import Gitalign.Types
     (
-        Repository(..)
-        , Commit(..)
+        Repository(RepositoryT, unRepo)
+        , Commit(CommitT, commitSHA, commitParents)
         , fromCommitList
         , numParents
         , numChildren
