@@ -1,7 +1,7 @@
 module Gitalign
     (
         module Gitalign.Types 
-        --, module Gitalign.Parsing
+        , module Gitalign.Parsing
     ) where
 import Gitalign.Types
     (
@@ -17,4 +17,5 @@ import Gitalign.Types
 
 import Gitalign.Parsing 
     (
+        shaFromDirectoryParser
     )
