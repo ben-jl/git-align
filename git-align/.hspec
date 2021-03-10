@@ -1,0 +1,6 @@
+--fail-fast
+--color
+--rerun
+--rerun-all-on-success
+--print-cpu-time
+-a 1000

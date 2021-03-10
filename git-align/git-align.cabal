@@ -26,7 +26,8 @@ library
     , HUnit
     , containers
     , graphite
-    , graphviz
+    , hspec
+    , hspec-contrib
   other-modules: Gitalign.Types
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
@@ -52,6 +53,7 @@ library
 Test-Suite test-git-align
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  
   other-modules:
     Test.ConstructorSpec
   hs-source-dirs: test/, test/Test/
@@ -66,7 +68,9 @@ Test-Suite test-git-align
     , call-stack
     , containers
     , graphite
-    , graphviz
+    , hspec
+    , hspec-contrib
+    , QuickCheck
   default-language: Haskell2010
   default-extensions: 
     EmptyCase

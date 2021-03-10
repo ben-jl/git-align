@@ -10,7 +10,6 @@ import qualified Data.Hashable as H
 import Data.Text ( Text ) 
 import Data.String (IsString(fromString))
 import Control.Monad (ap)
-import qualified Data.GraphViz.Types as GV 
 import qualified Data.Graph.Connectivity as GC
                 
 data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving Show
@@ -31,13 +30,6 @@ newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving Show
 prettyPrint :: Repository -> Text
 prettyPrint r = fromString $ D.prettyPrint (unRepo r)
 
-plotRepo :: Repository -> FilePath -> IO FilePath 
-plotRepo r =  V.plotDGraphPng (unRepo r)
-
-instance GV.PrintDot Commit where
-    toDot = GV.toDot . commitSHA
-    unqtDot = GV.toDot
-
 hasParent :: Repository -> Commit -> Commit -> Bool
 hasParent r = GC.areConnected (unRepo r)
 
@@ -47,8 +39,19 @@ numChildren r = D.vertexIndegree (unRepo r)
 numParents :: Repository -> Commit -> Int
 numParents r = D.vertexOutdegree (unRepo r)
 
+commitCount :: Repository -> Int
+commitCount = G.order . unRepo
+
+popLatestCommit :: Repository -> Maybe Commit
+popLatestCommit r = case G.vertices (unRepo r) of
+    [] -> Nothing
+    cs -> Just (maximum cs)
+
 fromCommitList :: [Commit] -> Repository
 fromCommitList cts = 
     let fromCommitList' [] acc = RepositoryT acc
-        fromCommitList' (c:cs) acc = fromCommitList' cs (G.insertEdgePairs ((c,) <$> commitParents c) acc)
+        --fromCommitList' (c:cs) acc = fromCommitList' cs (G.insertEdgePairs ((c,) <$> commitParents c) acc)
+        fromCommitList' (c:cs) acc = fromCommitList' cs (case commitParents c of
+            [] -> G.insertVertex c acc
+            cps -> G.insertEdgePairs ((c,) <$> cps) acc)
     in fromCommitList' cts G.empty
