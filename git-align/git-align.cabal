@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           git-align
-version:        0.1.0.0
+version:        0.0.1.0
 description:    Please see the README on GitHub at <https://github.com/ben-jl/git-align#readme>
 homepage:       https://github.com/https://github.com/ben-jl/git-align#readme
 bug-reports:    https://github.com/https://github.com/ben-jl/git-align/issues
@@ -17,70 +17,39 @@ source-repository head
 library
   exposed-modules:
       Gitalign
-  build-depends: base >= 4.10 && < 5
-    , text >= 1.2.0.0 && < 1.3
-    , unordered-containers >= 0.2.10 && < 0.3
-    , hashable >=1.3.0.0 && < 1.4
-    , bytestring >= 0.10.12.0 && < 0.11
-    , call-stack
-    , HUnit
-    , containers
-    , graphite
+  build-depends: base == 4.14.1.0
+    , text >= 1.2.0.0 && < 1.3.1.0
+    , hashable == 1.3.0.0
+    , graphite >= 0.10.0.0 && < 0.11
+    , QuickCheck == 2.14.2
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror -O0 
   other-modules: Gitalign.Types
+  
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
   default-extensions: 
-    EmptyCase
-    , FlexibleContexts
-    , FlexibleInstances
-    , InstanceSigs
-    , MultiParamTypeClasses
-    , LambdaCase
-    , MultiWayIf
-    , NamedFieldPuns
-    , TupleSections
-    , BangPatterns
-    , KindSignatures
-    , TypeOperators
-    , OverloadedStrings
-    , ScopedTypeVariables
-    , TypeApplications
-    , ConstraintKinds
-    , RankNTypes
+    EmptyCase, LambdaCase, OverloadedStrings, BangPatterns, TupleSections, NoImplicitPrelude
+    , FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, ConstraintKinds
+    , KindSignatures, ScopedTypeVariables, RankNTypes, DerivingStrategies, ImportQualifiedPost
 
 Test-Suite test-git-align
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  
   other-modules:
     Test.ConstructorSpec
   hs-source-dirs: test/, test/Test/
   build-depends:
     base >= 4.10 && < 5
     , git-align
-    , text >= 1.2.0.0 && < 1.3
-    , unordered-containers >= 0.2.10 && < 0.3
-    , hashable >=1.3.0.0 && < 1.4
-    , bytestring >= 0.10.12.0 && < 0.11
-    , HUnit
-    , call-stack
-    , containers
-    , graphite
+    , HUnit >= 1.6.0.0 && < 1.7  
+    , graphite >= 0.10.0.0 && < 0.11
+    , hspec >= 2.7.5 && < 2.8
+    , hspec-contrib == 0.5.1
+    , QuickCheck == 2.14.2
+  ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror -O0 
   default-language: Haskell2010
   default-extensions: 
-    EmptyCase
-    , FlexibleContexts
-    , FlexibleInstances
-    , InstanceSigs
-    , MultiParamTypeClasses
-    , LambdaCase
-    , MultiWayIf
-    , NamedFieldPuns
-    , TupleSections
-    , BangPatterns
-    , KindSignatures
-    , TypeOperators
-    , OverloadedStrings
-    , ScopedTypeVariables
-    , TypeApplications
-    , ConstraintKinds
-    , RankNTypes   
+    EmptyCase, LambdaCase, OverloadedStrings, BangPatterns, TupleSections, NoImplicitPrelude
+    , FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, ConstraintKinds
+    , KindSignatures, ScopedTypeVariables, RankNTypes, DerivingStrategies, ImportQualifiedPost

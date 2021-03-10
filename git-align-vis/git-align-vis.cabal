@@ -1,7 +1,7 @@
 cabal-version: 1.12
 
 name:           git-align-vis
-version:        0.1.0.0
+version:        0.0.0.1
 description:    Please see the README on GitHub at <https://github.com/ben-jl/git-align#readme>
 homepage:       https://github.com/https://github.com/ben-jl/git-align#readme
 bug-reports:    https://github.com/https://github.com/ben-jl/git-align/issues
