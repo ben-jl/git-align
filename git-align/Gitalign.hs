@@ -1,6 +1,6 @@
 module Gitalign
     (
-        module Gitalign.Types
+        module Gitalign.Types 
     ) where
-import Gitalign.Types 
+import Gitalign.Types(Repository(..), Commit(..), fromCommitList, parents)
 

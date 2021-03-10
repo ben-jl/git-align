@@ -1,2 +1,5 @@
+import Test.ConstructorSpec  (constructorSpec)
+
 main :: IO ()
-main = putStrLn "test suite goes here"
+main = do
+    constructorSpec
