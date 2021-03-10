@@ -11,7 +11,8 @@ import Data.Text ( Text )
 import Data.String (IsString(fromString))
 import Control.Monad (ap)
 import qualified Data.Graph.Connectivity as GC
-                
+
+newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving Show
 data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving Show
 instance H.Hashable Commit where
     hashWithSalt s = H.hashWithSalt s . commitSHA
@@ -24,8 +25,6 @@ instance Eq Commit where
 
 instance IsString Commit where
     fromString s = CommitT (fromString s) [] 
-
-newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving Show
 
 prettyPrint :: Repository -> Text
 prettyPrint r = fromString $ D.prettyPrint (unRepo r)
@@ -42,8 +41,8 @@ numParents r = D.vertexOutdegree (unRepo r)
 commitCount :: Repository -> Int
 commitCount = G.order . unRepo
 
-popLatestCommit :: Repository -> Maybe Commit
-popLatestCommit r = case G.vertices (unRepo r) of
+peekLatestCommit :: Repository -> Maybe Commit
+peekLatestCommit r = case G.vertices (unRepo r) of
     [] -> Nothing
     cs -> Just (maximum cs)
 

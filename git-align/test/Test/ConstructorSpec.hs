@@ -73,7 +73,7 @@ repoPropertyTests =
                         commitCount r `shouldBe` order (unRepo r)
             HQ.prop "commit a -> commit b iff a is a child of b" $
                 \r -> 
-                    let lc = popLatestCommit r 
+                    let lc = peekLatestCommit r 
                         sizeString = case Prelude.length (maybe [] commitParents lc) of
                             z | z == 0 -> "No parents"
                             z | z == 1 -> "Exactly one parent"

@@ -11,6 +11,6 @@ import Gitalign.Types
         , numChildren
         , hasParent
         , commitCount
-        , popLatestCommit
+        , peekLatestCommit
     )
 
