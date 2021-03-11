@@ -2,7 +2,7 @@
     "version":"2.0.0",
     "tasks": [
         {
-            "command": "stack build && stack test",
+            "command": "stack test git-align --coverage --exec \"stack hpc report --all --destdir git-align/.hpc/reports\"",
             "label": "stack build",
             "group":{
                 "kind": "build",
