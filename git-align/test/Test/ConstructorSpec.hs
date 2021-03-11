@@ -9,7 +9,7 @@ import Gitalign
       peekLatestCommit,
       Commit(CommitT, commitParents),
       Repository(unRepo) )
-import Prelude (Bool(True), Maybe (Just, Nothing), length, ($), (.), IO, fmap, and)
+import Prelude (Bool(True), Maybe (Just, Nothing), length, ($), (.), IO, fmap, and,Show (show), Eq ((/=)))
 import Test.HUnit as H ( (~:), (~?=), Test(TestList) )
 import Test.Hspec ( hspec, describe, shouldBe, Spec )
 import Test.Hspec.Contrib.HUnit qualified as HSC
@@ -21,6 +21,7 @@ constructorSpec :: IO ()
 constructorSpec = hspec $ do
             simpleObjGraphConstruction
             repoPropertyTests
+            otherwiseUnTouchedInstancesArentTrivial
             
 
 simpleObjGraphConstruction :: Spec 
@@ -28,22 +29,22 @@ simpleObjGraphConstruction =
                                 -- foo -- bar
                                 --     \
                                 --      ten -- excavate
-    let repo = fromCommitList [CommitT "foo" ["bar", "ten"], CommitT "bar" [], CommitT "ten" ["excavate"], CommitT "excavate" []]
+    let repo = fromCommitList [CommitT "foo" [CommitT "bar" [] , CommitT "ten" []], CommitT "bar" [], CommitT "ten" [CommitT "excavate" []], CommitT "excavate" []]
     in
     describe "constructs a repo from list" $
     do HSC.fromHUnitTest $
         H.TestList [
-            "it (foo) is child of ten" H.~: hasParent repo "foo" "bar" H.~?= True, 
-            "it (foo) is child of bar" H.~: hasParent repo "foo" "bar" H.~?= True,
-            "it (foo) has 0 children" H.~: numChildren repo "foo" H.~?= 0,
-            "it (foo) has 2 parents" H.~: numParents repo "foo" H.~?= 2,
-            "it (ten) is a child of excavate" H.~: hasParent repo "ten" "excavate" H.~?= True,
-            "it (ten) has 1 child" H.~: numChildren repo "ten" H.~?= 1, 
-            "it (ten) has 1 parent" H.~: numParents repo "ten" H.~?= 1, 
-            "it (bar) has 0 parents" H.~: numParents repo "bar" H.~?= 0,
-            "it (bar) has 1 child" H.~: numChildren repo "bar" H.~?= 1,
-            "it (excavate) has 0 parents" H.~: numParents repo "excavate" H.~?= 0,
-            "it (excavate) has 1 child" H.~: numChildren repo "excavate" H.~?= 1]
+            "it (foo) is child of ten" H.~: hasParent repo (CommitT "foo" []) (CommitT "bar" []) H.~?= True, 
+            "it (foo) is child of bar" H.~: hasParent repo (CommitT "foo" [])  (CommitT "bar" []) H.~?= True,
+            "it (foo) has 0 children" H.~: numChildren repo (CommitT "foo" []) H.~?= 0,
+            "it (foo) has 2 parents" H.~: numParents repo (CommitT "foo" []) H.~?= 2,
+            "it (ten) is a child of excavate" H.~: hasParent repo (CommitT "ten" []) (CommitT "excavate" []) H.~?= True,
+            "it (ten) has 1 child" H.~: numChildren repo (CommitT "ten" []) H.~?= 1, 
+            "it (ten) has 1 parent" H.~: numParents repo (CommitT "ten" []) H.~?= 1, 
+            "it (bar) has 0 parents" H.~: numParents repo (CommitT "bar" []) H.~?= 0,
+            "it (bar) has 1 child" H.~: numChildren repo (CommitT "bar" []) H.~?= 1,
+            "it (excavate) has 0 parents" H.~: numParents repo (CommitT "excavate" []) H.~?= 0,
+            "it (excavate) has 1 child" H.~: numChildren repo (CommitT "excavate" []) H.~?= 1]
 
 repoPropertyTests :: Spec
 repoPropertyTests = do
@@ -60,6 +61,10 @@ repoPropertyTests = do
                             Nothing -> commitCount r `shouldBe` 0
                             Just c -> and (fmap (hasParent r c) (commitParents c)) `shouldBe` True
 
-
-
-
+otherwiseUnTouchedInstancesArentTrivial :: Spec
+otherwiseUnTouchedInstancesArentTrivial = do
+    describe "Catchall for random instance declarations" $ do
+        HQ.prop "Show repo returns a non-empty string" $
+            \x -> show (x :: Repository) /= ""
+        HQ.prop "Show commit returns a non-empty string" $ 
+            \x -> show (x :: Commit) /= ""

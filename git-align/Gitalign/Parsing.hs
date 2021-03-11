@@ -36,5 +36,5 @@ parseCommits = do
     shas <- many parseCommitLine
     _ <- string "tree" >> string " " >> parseSHA 
     _ <- endOfLine 
-    let parentCommits = (`CommitT` []) <$> shas
-    return $ \x -> CommitT x parentCommits
+    let parentCommits = [CommitT c [] | c <- shas]
+    return $ \x ->  CommitT x parentCommits

@@ -14,18 +14,18 @@ where
 
 import Prelude (Bool, Eq ((/=), (==)), Int, Maybe (Just, Nothing),
                 Ord (compare, (<=)), Show, String, length, map,
-                maximum, return, ($), (.), (<$>), (<*>))
+                maximum, return, ($), (.), (<$>), (<*>), Functor (fmap))
 import Data.Graph.Types qualified as  G 
 import Data.Graph.DGraph qualified as D
 import Data.Hashable qualified as H
-import Data.Text ( Text ) 
+import Data.Text ( Text, pack ) 
 import Data.String (IsString(fromString))
 import Data.Graph.Connectivity qualified as GC
 import Test.QuickCheck qualified as Q
 import Data.List qualified
 
 newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving stock (Show)
-data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving stock (Show)
+data Commit = CommitT { commitSHA :: !Text, commitParents :: [Commit] } deriving stock (Show)
 
 instance H.Hashable Commit where
     hashWithSalt s = H.hashWithSalt s . commitSHA
@@ -36,8 +36,6 @@ instance Ord Commit where
 instance Eq Commit where
     (==) c1 c2 = commitSHA c1 == commitSHA c2
 
-instance IsString Commit where
-    fromString s = CommitT (fromString s) [] 
 
 hasParent :: Repository -> Commit -> Commit -> Bool
 hasParent r = GC.areConnected (unRepo r)
@@ -68,11 +66,11 @@ instance Q.Arbitrary Repository where
     arbitrary = do
         strList <- Q.listOf (Q.arbitrary `Q.suchThat` (\c -> length c <= 8) :: Q.Gen String) 
         let subseqs = Data.List.take (length strList) (Data.List.permutations strList)
-        let commits = Data.List.zipWith (\x y -> CommitT (fromString x) (fromString <$> y)) strList subseqs
+        let commits = Data.List.zipWith (\x y -> CommitT x (CommitT <$> y <*> [])) (pack <$> strList) (fmap (fmap pack) subseqs)
         return $ fromCommitList commits
 
 instance Q.Arbitrary Commit where
     arbitrary = do
-        textList <- Q.listOf (Q.arbitrary `Q.suchThat` (/=) []) `Q.suchThat` (\c -> length c <= 5) :: Q.Gen [String]
+        textList <- Q.arbitrary :: Q.Gen [String]
         currSha <- Q.arbitrary `Q.suchThat` (/=) [] :: Q.Gen String
         return $ CommitT (fromString currSha) (CommitT <$> map fromString textList <*> [])

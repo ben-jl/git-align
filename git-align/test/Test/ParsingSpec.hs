@@ -1,14 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Test.ParsingSpec where
 
-import           Prelude (IO, ($), Maybe(Just, Nothing),  Char, (<>), return, String, Applicative (pure), (<$>), Int, length, print, (>>), (.))
+import           Prelude (IO, ($), Maybe(Just, Nothing), head, (>), (==), Char, (<>), return, String, Applicative (pure), (<$>), Int, length, print, (>>), (.))
 import           Data.Char (isAlphaNum)
+import Data.String(fromString)
 import           Data.Attoparsec.Text (maybeResult, parse, eitherResult)
-import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine, parseCommits, Commit (commitParents))
+import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine, parseCommits, Commit (commitParents), numParents)
 import           Test.Hspec (Spec, describe, hspec, shouldBe, it)
 import           Data.Text (pack, concat)
 import qualified Test.Hspec.QuickCheck as HQ (prop)
-import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof, chooseEnum)
+import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof, chooseEnum, (==>))
 import Data.Bool
 import Data.Either
 
@@ -81,6 +82,16 @@ commitCatFileQuickSpec = do
         let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\nAuthor: Scott Chacon <schacon@gmail.com>\nDate:   Fri May 22 18:14:29 2009 -0700\n\nFirst line\nSecond line"
         return $ case eitherResult (parse parseCommits commitLine) of
                     Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
+                    Left err -> print err >> (True `shouldBe` False)
+    HQ.prop "should parse commits w/ variable parents" $ do
+        countParents <- chooseEnum (0, 10) :: Gen Int
+        commits <- vectorOf countParents (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char))
+        sha <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+        let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\n"
+        return $ case eitherResult (parse parseCommits commitLine) of 
+                    Right f -> let parentsLength = length (commitParents (f (pack sha))) in case parentsLength of
+                                    0 -> 0 `shouldBe` countParents
+                                    _ -> Just (length (commitParents . head $ commitParents (f (pack sha)))) `shouldBe` (Just 0)
                     Left err -> print err >> (True `shouldBe` False)
 
 shaParsingQuickSpec :: Spec
