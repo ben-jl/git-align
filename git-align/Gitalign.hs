@@ -1,6 +1,7 @@
 module Gitalign
     (
         module Gitalign.Types 
+        , module Gitalign.Parsing
     ) where
 import Gitalign.Types
     (
@@ -14,3 +15,10 @@ import Gitalign.Types
         , peekLatestCommit
     )
 
+import Gitalign.Parsing 
+    (
+        shaFromDirectoryParser,
+        parseSHA,
+        parseCommits,
+        parseCommitLine
+    )

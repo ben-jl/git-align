@@ -26,6 +26,7 @@ import Data.List qualified
 
 newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving stock (Show)
 data Commit = CommitT { commitSHA :: Text, commitParents :: [Commit] } deriving stock (Show)
+
 instance H.Hashable Commit where
     hashWithSalt s = H.hashWithSalt s . commitSHA
 
@@ -58,7 +59,6 @@ peekLatestCommit r = case G.vertices (unRepo r) of
 fromCommitList :: [Commit] -> Repository
 fromCommitList cts = 
     let fromCommitList' [] acc = RepositoryT acc
-        --fromCommitList' (c:cs) acc = fromCommitList' cs (G.insertEdgePairs ((c,) <$> commitParents c) acc)
         fromCommitList' (c:cs) acc = fromCommitList' cs (case commitParents c of
             [] -> G.insertVertex c acc
             cps -> G.insertEdgePairs ((c,) <$> cps) acc)
