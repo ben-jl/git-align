@@ -58,6 +58,30 @@ commitCatFileQuickSpec = do
         return $ case eitherResult (parse parseCommits commitLine) of 
                     Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
                     Left err -> print err >> (True `shouldBe` False)
+    HQ.prop "should parse commits w/ author lines" $ do
+        countParents <- chooseEnum (0, 10) :: Gen Int
+        commits <- vectorOf countParents (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char))
+        sha <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+        let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\nAuthor: Scott Chacon <schacon@gmail.com>\n"
+        return $ case eitherResult (parse parseCommits commitLine) of
+                    Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
+                    Left err -> print err >> (True `shouldBe` False)
+    HQ.prop "should parse commits w/ author lines and date" $ do
+        countParents <- chooseEnum (0, 10) :: Gen Int
+        commits <- vectorOf countParents (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char))
+        sha <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+        let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\nAuthor: Scott Chacon <schacon@gmail.com>\nDate:   Fri May 22 18:14:29 2009 -0700\n"
+        return $ case eitherResult (parse parseCommits commitLine) of
+                    Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
+                    Left err -> print err >> (True `shouldBe` False)
+    HQ.prop "should parse commits w/ author lines and date and message" $ do
+        countParents <- chooseEnum (0, 10) :: Gen Int
+        commits <- vectorOf countParents (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char))
+        sha <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+        let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\nAuthor: Scott Chacon <schacon@gmail.com>\nDate:   Fri May 22 18:14:29 2009 -0700\n\nFirst line\nSecond line"
+        return $ case eitherResult (parse parseCommits commitLine) of
+                    Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
+                    Left err -> print err >> (True `shouldBe` False)
 
 shaParsingQuickSpec :: Spec
 shaParsingQuickSpec = do 
