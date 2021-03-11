@@ -2,19 +2,36 @@
 module Test.ParsingSpec where
 
 --import Test.Hspec qualified as H
-import           Prelude (IO, ($), Maybe(Just),  Char, (<>), return)
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+--import Test.Hspec qualified as H
+import           Prelude (IO, ($), Maybe(Just, Nothing),  Char, (<>), return, String, Applicative (pure), (<$>))
 import           Data.Char (isAlphaNum)
 import           Data.Attoparsec.Text (maybeResult, parse)
-import           Gitalign (shaFromDirectoryParser, parseSHA)
+import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine)
 import           Test.Hspec (Spec, describe, hspec, shouldBe, it)
 import           Data.Text (pack)
 import qualified Test.Hspec.QuickCheck as HQ (prop)
-import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat)
+import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof)
 
 gitParsingSpec :: IO ()
 gitParsingSpec = hspec $
     describe "it parses git objects from object directre correctly" $ do
         shaParsingSpec
+        commitLineSpec
+        commitLineQuickSpec
         shaParsingQuickSpec
 
 shaParsingSpec :: Spec
@@ -25,6 +42,24 @@ shaParsingSpec = do
     it "should parse sha w/ Windows-style path seperators" $
         let exampleShaPath = "da\\39a3ee5e6b4b0d3255bfef95601890afd80709" in
             maybeResult (parse shaFromDirectoryParser exampleShaPath) `shouldBe` Just "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+
+commitLineSpec :: Spec
+commitLineSpec = do
+    it "should parse a line starting w/ commit" $
+        let example = "commit cac0cab538b970a37ea1e769cbbde608743bc96d\n"
+            res = maybeResult (parse parseCommitLine example)  in
+                res `shouldBe` Just (pack "cac0cab538b970a37ea1e769cbbde608743bc96d")
+
+commitLineQuickSpec :: Spec
+commitLineQuickSpec = do
+    HQ.prop "should parse every line starting with commit" $ do
+        prefix <- oneof [pure  "commit", arbitrary :: Gen String]
+        sha <- pack <$> (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char) :: Gen String)
+        let line = pack prefix <> " " <> sha <> "\n"
+        let res = maybeResult (parse parseCommitLine line)
+        return $ case prefix of
+                    "commit" -> res `shouldBe` Just sha
+                    _ -> res `shouldBe` Nothing
 
 shaParsingQuickSpec :: Spec
 shaParsingQuickSpec = do 
