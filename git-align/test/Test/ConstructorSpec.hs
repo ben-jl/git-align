@@ -9,23 +9,17 @@ import Gitalign
       peekLatestCommit,
       Commit(CommitT, commitParents),
       Repository(unRepo) )
-import Prelude (Bool(True), Eq ((/=)), Maybe (Just, Nothing),
-                Ord ((>=)), length, ($), (.), IO, fmap, and, maybe)
+import Prelude (Bool(True), Maybe (Just, Nothing), length, ($), (.), IO, fmap, and)
 import Test.HUnit as H ( (~:), (~?=), Test(TestList) )
 import Test.Hspec ( hspec, describe, shouldBe, Spec )
 import Test.Hspec.Contrib.HUnit qualified as HSC
-import Test.QuickCheck qualified  as Q
 import Test.Hspec.QuickCheck qualified  as HQ
 import Data.List (nub)
 import Data.Graph.Types (order)
 
 constructorSpec :: IO ()
 constructorSpec = hspec $ do
-    describe "standard tests" $
-        do 
             simpleObjGraphConstruction
-    describe "property tests" $
-        do
             repoPropertyTests
             
 
@@ -52,25 +46,19 @@ simpleObjGraphConstruction =
             "it (excavate) has 1 child" H.~: numChildren repo "excavate" H.~?= 1]
 
 repoPropertyTests :: Spec
-repoPropertyTests = 
-    describe "repo util functions satisfy expected properties" $
-        describe "fromCommitList satisifies expected properties" $ do
-            HQ.prop "order of repo is same as number of distinct items in list" $
-                \x ->
-                    Q.cover 90 (length (nub x) >= 1) "non-trivial" $
-                        (commitCount . fromCommitList) x `shouldBe` length (nub x) 
-            HQ.prop "commitCount should behave exactly like order . unrepo" $
-                \r ->
-                    Q.cover 90 (commitCount r /= 0) "non-trivial" $
-                        commitCount r `shouldBe` order (unRepo r)
+repoPropertyTests = do
+        describe "basic repo prop tests" $ do
+            HQ.prop "commitCount is same as number of distinct items" $
+                \x -> (commitCount . fromCommitList) x `shouldBe` length (nub x) 
+            HQ.prop "commitCount should behave exactly like order" $
+                \r -> commitCount r `shouldBe` order (unRepo r)
             HQ.prop "commit a -> commit b iff a is a child of b" $
                 \r -> 
                     let lc = peekLatestCommit r 
                     in
-                        Q.cover 90 (length (maybe [] commitParents lc) /= 0) "non-trivial" $
-                            case lc of
-                                Nothing -> commitCount r `shouldBe` 0
-                                Just c -> and (fmap (hasParent r c) (commitParents c)) `shouldBe` True
+                        case lc of
+                            Nothing -> commitCount r `shouldBe` 0
+                            Just c -> and (fmap (hasParent r c) (commitParents c)) `shouldBe` True
 
 
 

@@ -5,7 +5,7 @@ module Test.ParsingSpec where
 import           Prelude (IO, ($), Maybe(Just),  Char, (<>), return)
 import           Data.Char (isAlphaNum)
 import           Data.Attoparsec.Text (maybeResult, parse)
-import           Gitalign (shaFromDirectoryParser)
+import           Gitalign (shaFromDirectoryParser, parseSHA)
 import           Test.Hspec (Spec, describe, hspec, shouldBe, it)
 import           Data.Text (pack)
 import qualified Test.Hspec.QuickCheck as HQ (prop)
@@ -27,8 +27,8 @@ shaParsingSpec = do
             maybeResult (parse shaFromDirectoryParser exampleShaPath) `shouldBe` Just "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 
 shaParsingQuickSpec :: Spec
-shaParsingQuickSpec = 
-    describe "automated property testing of SHA parser" $  do
+shaParsingQuickSpec = do 
+    describe "automated property testing of SHA parser from directory" $ do
         HQ.prop "parse result matches input w/out strings (Unix path seperators)"  $  do
             firstTwo <- vectorOf 2 (arbitrary `suchThat` isAlphaNum :: Gen Char) 
             remaining <- vectorOf 38 (arbitrary `suchThat` isAlphaNum :: Gen Char)
@@ -41,3 +41,8 @@ shaParsingQuickSpec =
             let pathString =  pack firstTwo <> "\\" <> pack remaining
             let expectedOutput = pack firstTwo <> pack remaining
             return $ maybeResult (parse shaFromDirectoryParser pathString) `shouldBe` Just expectedOutput
+    describe "automated property testing of SHA parser (no directory)" $ do 
+        HQ.prop "all 40 character alphanumberic strings pass" $ do
+            x <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+            return $ maybeResult (parse parseSHA (pack x)) `shouldBe` Just (pack x)
+            

@@ -17,5 +17,6 @@ import Gitalign.Types
 
 import Gitalign.Parsing 
     (
-        shaFromDirectoryParser
+        shaFromDirectoryParser,
+        parseSHA
     )
