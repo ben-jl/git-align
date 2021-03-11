@@ -1,17 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Test.ParsingSpec where
 
-import           Prelude (IO, ($), Maybe(Just, Nothing), head, (>), (==), Char, (<>), return, String, Applicative (pure), (<$>), Int, length, print, (>>), (.))
+import           Prelude (IO, ($), Maybe(Just, Nothing), head, Char, (<>), return, String, Applicative (pure), (<$>), Int, length, print, (>>), (.))
 import           Data.Char (isAlphaNum)
-import Data.String(fromString)
 import           Data.Attoparsec.Text (maybeResult, parse, eitherResult)
-import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine, parseCommits, Commit (commitParents), numParents)
+import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine, parseCommits, Commit (commitParents))
 import           Test.Hspec (Spec, describe, hspec, shouldBe, it)
 import           Data.Text (pack, concat)
 import qualified Test.Hspec.QuickCheck as HQ (prop)
-import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof, chooseEnum, (==>))
-import Data.Bool
-import Data.Either
+import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof, chooseEnum)
+import Data.Bool ( Bool(False, True) )
+import Data.Either ( Either(Left, Right) )
 
 gitParsingSpec :: IO ()
 gitParsingSpec = hspec $

@@ -14,6 +14,7 @@ import Data.Text (Text, pack)
 import Prelude (return, (<>), ($), (<$>),(>>))
 import Gitalign.Types (Commit(CommitT))
 
+
 shaFromDirectoryParser :: Parser Text
 shaFromDirectoryParser = do
     firstTwo <- count 2 (satisfy isAlphaNum)
