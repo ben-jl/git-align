@@ -1,37 +1,24 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Test.ParsingSpec where
 
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
---import Test.Hspec qualified as H
-import           Prelude (IO, ($), Maybe(Just, Nothing),  Char, (<>), return, String, Applicative (pure), (<$>))
+import           Prelude (IO, ($), Maybe(Just, Nothing),  Char, (<>), return, String, Applicative (pure), (<$>), Int, length, print, (>>), (.))
 import           Data.Char (isAlphaNum)
-import           Data.Attoparsec.Text (maybeResult, parse)
-import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine)
+import           Data.Attoparsec.Text (maybeResult, parse, eitherResult)
+import           Gitalign (shaFromDirectoryParser, parseSHA, parseCommitLine, parseCommits, Commit (commitParents))
 import           Test.Hspec (Spec, describe, hspec, shouldBe, it)
-import           Data.Text (pack)
+import           Data.Text (pack, concat)
 import qualified Test.Hspec.QuickCheck as HQ (prop)
-import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof)
+import           Test.QuickCheck (Arbitrary (arbitrary), Gen, vectorOf, suchThat, oneof, chooseEnum)
+import Data.Bool
+import Data.Either
 
 gitParsingSpec :: IO ()
 gitParsingSpec = hspec $
-    describe "it parses git objects from object directre correctly" $ do
+    describe "it parses git objects from object directory correctly" $ do
         shaParsingSpec
         commitLineSpec
         commitLineQuickSpec
+        commitCatFileQuickSpec
         shaParsingQuickSpec
 
 shaParsingSpec :: Spec
@@ -60,6 +47,17 @@ commitLineQuickSpec = do
         return $ case prefix of
                     "commit" -> res `shouldBe` Just sha
                     _ -> res `shouldBe` Nothing
+
+commitCatFileQuickSpec :: Spec
+commitCatFileQuickSpec = do
+    HQ.prop "should parse commits w/ variable parents" $ do
+        countParents <- chooseEnum (0, 10) :: Gen Int
+        commits <- vectorOf countParents (vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char))
+        sha <- vectorOf 40 (arbitrary `suchThat` isAlphaNum :: Gen Char)
+        let commitLine = concat (pack . (\x -> "commit " <> x <> "\n") <$> commits) <> "tree cac0cab538b970a37ea1e769cbbde608743bc96d\n"
+        return $ case eitherResult (parse parseCommits commitLine) of 
+                    Right f  -> length (commitParents (f (pack sha))) `shouldBe` countParents
+                    Left err -> print err >> (True `shouldBe` False)
 
 shaParsingQuickSpec :: Spec
 shaParsingQuickSpec = do 
