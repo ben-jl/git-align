@@ -4,20 +4,26 @@ import Gitalign
     ( repoFromList,
       count,
       isChildOf,
+      peekRepo,
       SHA(..),
       Repository)
-import Prelude (Bool(True), Maybe (Just, Nothing), length, ($), (.), IO, fmap, and,Show (show), Eq ((/=)), (>))
+import Prelude (String, return, (==), not, zipWith, head, map, print, (++), Bool(True, False), Maybe (Just, Nothing), length, ($), (.), IO, fmap, and,Show (show), Eq ((/=)), (>), (>>=), (<=))
 import Test.HUnit as H ( (~:), (~?=), Test(TestList) )
+import Data.List (permutations)
 import Test.Hspec ( hspec, describe, shouldBe, Spec )
 import Test.Hspec.Contrib.HUnit qualified as HSC
 import Test.Hspec.QuickCheck qualified  as HQ
+import Data.Text (pack)
 import Data.List (nub)
 import Data.Graph.Types (order)
+import Test.QuickCheck
+import Data.Maybe (isJust, isNothing)
 
 
 constructorSpec :: IO ()
 constructorSpec = hspec $ do
     simpleObjGraphConstruction
+    repoCreationPropertyTests
     repoPropertyTests
 -- constructorSpec = hspec $ do
 --             simpleObjGraphConstruction
@@ -70,26 +76,22 @@ simpleObjGraphConstruction =
 --                 "it (ten) is a child of excavate" H.~: isDirectAncestor tenCommit excavateCommit H.~?= Just [excavateCommit, tenCommit]
 --                 ]
 
+repoCreationPropertyTests :: Spec
+repoCreationPropertyTests = do
+        describe "repoFromList property tests" $ do
+            HQ.prop "size of repo == length of input list" $ do
+                forAll shaMapGen $ \x -> count (repoFromList x) `shouldBe` length (nub x)
+
 repoPropertyTests :: Spec
 repoPropertyTests = do
-        describe "basic repo prop tests" $ do
-            HQ.prop "non empty list ==> non empty repo" $
-                \x -> (count . repoFromList) x > -1 `shouldBe` True
---             HQ.prop "commitCount should behave exactly like order" $
---                 \r -> commitCount r `shouldBe` order (unRepo r)
---             HQ.prop "commit a -> commit b iff a is a child of b" $
---                 \r -> 
---                     let lc = peekLatestCommit r 
---                     in
---                         case lc of
---                             Nothing -> commitCount r `shouldBe` 0
---                             Just c -> and (fmap (hasParent r c) (commitParents c)) `shouldBe` True
+    describe "repo property tests" $ do
+        HQ.prop "peekRepo only returns Just a when repo is non-empty and vice versa" $ do
+            \r -> case peekRepo r of
+                Just _ -> count r > 0 `shouldBe` True
+                Nothing -> count r == 0 `shouldBe` True
 
--- otherwiseUnTouchedInstancesArentTrivial :: Spec
--- otherwiseUnTouchedInstancesArentTrivial = do
---     describe "Catchall for random instance declarations" $ do
---         HQ.prop "Show repo returns a non-empty string" $
---             \x -> show (x :: Repository) /= ""
---         HQ.prop "Show commit returns a non-empty string" $ 
---             \x -> show (x :: Commit) /= ""
-
+shaMapGen :: Gen [(SHA, [SHA])]
+shaMapGen = do
+        ss <- listOf (arbitrary `suchThat` (not . (==) []) :: Gen String) `suchThat` (\x -> length x <= 10)  :: Gen [String]
+        ys <- vectorOf (length ss) (sublistOf ss) :: Gen [[String]]
+        (return  $ zipWith (\x y -> (SHA (pack x), map (SHA . pack) y)) ss ys) :: Gen [(SHA, [SHA])]

@@ -12,6 +12,7 @@ import Gitalign.Types
         , numChildren
         , count
         , isChildOf
+        , peekRepo
     )
 
 import Gitalign.Parsing 
