@@ -75,6 +75,7 @@ fromCommitList cts =
             cps -> G.insertEdgePairs ((c,) <$> cps) acc)
     in fromCommitList' cts G.empty
 
+
 instance Q.Arbitrary Repository where
     arbitrary = do
         strList <- Q.listOf (Q.arbitrary `Q.suchThat` (\c -> length c <= 8) :: Q.Gen String) 
