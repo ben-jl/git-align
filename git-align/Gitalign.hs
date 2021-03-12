@@ -13,6 +13,7 @@ import Gitalign.Types
         , hasParent
         , commitCount
         , peekLatestCommit
+        , isDirectAncestor
     )
 
 import Gitalign.Parsing 

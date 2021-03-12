@@ -90,7 +90,7 @@ commitCatFileQuickSpec = do
         return $ case eitherResult (parse parseCommits commitLine) of 
                     Right f -> let parentsLength = length (commitParents (f (pack sha))) in case parentsLength of
                                     0 -> 0 `shouldBe` countParents
-                                    _ -> Just (length (commitParents . head $ commitParents (f (pack sha)))) `shouldBe` (Just 0)
+                                    _ -> Just (length (commitParents . head $ commitParents (f (pack sha)))) `shouldBe` Just 0
                     Left err -> print err >> (True `shouldBe` False)
 
 shaParsingQuickSpec :: Spec

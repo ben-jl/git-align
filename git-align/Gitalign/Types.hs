@@ -9,20 +9,22 @@ module Gitalign.Types
         , hasParent
         , commitCount
         , peekLatestCommit
+        , isDirectAncestor
     )
 where
 
-import Prelude (Bool, Eq ((/=), (==)), Int, Maybe (Just, Nothing),
+import Prelude (Bool, Eq ((/=), (==)), Int,
                 Ord (compare, (<=)), Show, String, length, map,
-                maximum, return, ($), (.), (<$>), (<*>), Functor (fmap))
+                maximum, ($), (.), (<$>), (<*>), otherwise)
 import Data.Graph.Types qualified as  G 
 import Data.Graph.DGraph qualified as D
 import Data.Hashable qualified as H
 import Data.Text ( Text, pack ) 
-import Data.String (IsString(fromString))
 import Data.Graph.Connectivity qualified as GC
 import Test.QuickCheck qualified as Q
 import Data.List qualified
+import Data.Maybe ( Maybe(..), fromMaybe )
+import Control.Monad ( Monad(return), Functor(fmap), msum )
 
 newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving stock (Show)
 data Commit = CommitT { commitSHA :: !Text, commitParents :: [Commit] } deriving stock (Show)
@@ -36,6 +38,17 @@ instance Ord Commit where
 instance Eq Commit where
     (==) c1 c2 = commitSHA c1 == commitSHA c2
 
+isDirectAncestor :: Commit -> Commit -> Maybe [Commit]
+isDirectAncestor c1 c2 =
+    let isDirectAncestor' ci1@(CommitT s1 []    ) (CommitT s2 _) Nothing = if s1 == s2 then Just [ci1] else Nothing
+        isDirectAncestor' ci1@(CommitT s1 []    ) (CommitT s2 _) (Just g)  = if s1 == s2 then Just (ci1:g) else Nothing
+        isDirectAncestor' ci1@(CommitT s1 ls1   ) ci2@(CommitT s2 _) acc 
+            | s1 == s2 = Just $  ci1 : fromMaybe [] acc
+            | otherwise = 
+                let sPath = ci1 : fromMaybe [] acc
+                in msum [isDirectAncestor' p ci2 (Just sPath) | p <- ls1]                      
+    in
+        isDirectAncestor' c1 c2 Nothing 
 
 hasParent :: Repository -> Commit -> Commit -> Bool
 hasParent r = GC.areConnected (unRepo r)
@@ -73,4 +86,4 @@ instance Q.Arbitrary Commit where
     arbitrary = do
         textList <- Q.arbitrary :: Q.Gen [String]
         currSha <- Q.arbitrary `Q.suchThat` (/=) [] :: Q.Gen String
-        return $ CommitT (fromString currSha) (CommitT <$> map fromString textList <*> [])
+        return $ CommitT (pack currSha) (CommitT <$> map pack textList <*> [])
