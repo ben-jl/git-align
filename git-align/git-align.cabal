@@ -23,9 +23,11 @@ library
     , graphite >= 0.10.0.0 && < 0.11
     , QuickCheck == 2.14.2
     , attoparsec == 0.13.2.5
+    , unordered-containers
+    , containers
   ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints 
   -- -Werror -O0 
-  other-modules: Gitalign.Types, Gitalign.Parsing
+  other-modules: Gitalign.Types, Gitalign.Parsing, Gitalign.Internal.Types
   
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
