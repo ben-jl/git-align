@@ -27,7 +27,7 @@ library
     , containers
   ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints 
   -- -Werror -O0 
-  other-modules: Gitalign.Types, Gitalign.Parsing, Gitalign.Internal.Types
+  other-modules: Gitalign.Types, Gitalign.Parsing, Gitalign.Digraph.Types
   
   hs-source-dirs: ., ./Gitalign
   default-language: Haskell2010
@@ -40,7 +40,7 @@ Test-Suite test-git-align
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-    Test.ConstructorSpec, Test.ParsingSpec 
+    Test.ConstructorSpec, Test.ParsingSpec, Test.GraphTypeSpec
   hs-source-dirs: test/, test/Test/
   build-depends:
     base >= 4.10 && < 5
@@ -52,7 +52,9 @@ Test-Suite test-git-align
     , hspec-contrib == 0.5.1
     , QuickCheck == 2.14.2
     , attoparsec == 0.13.2.5
+    , hashable
     , ascii
+    , unordered-containers
   ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints 
   -- -Werror -O0 
   default-language: Haskell2010
