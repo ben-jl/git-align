@@ -1,90 +1,65 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Gitalign.Types 
     (
         Repository(..)
-        , Commit(..)
-        , fromCommitList
+        , SHA(..)
         , numParents
         , numChildren
-        , hasParent
-        , commitCount
-        , peekLatestCommit
-        , isDirectAncestor
+        , isChildOf
+        , count
+        , repoFromList
+        , peekRepo
     )
 where
 
-import Prelude (Bool, Eq ((/=), (==)), Int,
+import Prelude ((<$>), Bool, Eq ((/=), (==)), Int,
                 Ord (compare, (<=)), Show, String, length, map,
-                maximum, ($), (.), (<$>), (<*>), otherwise)
+                maximum, ($), (.), (<$>), (<*>), otherwise, undefined, Functor (fmap), return, not)
+import Data.Char
 import Data.Graph.Types qualified as  G 
 import Data.Graph.DGraph qualified as D
 import Data.Hashable qualified as H
+import Data.HashMap.Strict qualified as HM
 import Data.Text ( Text, pack ) 
-import Data.Graph.Connectivity qualified as GC
-import Test.QuickCheck qualified as Q
-import Data.List qualified
-import Data.Maybe ( Maybe(..), fromMaybe )
-import Control.Monad ( Monad(return), Functor(fmap), msum )
+import qualified Gitalign.Internal.Types  as T (isConnected, peek)
+import Test.QuickCheck
+import Prelude
+import Data.List (permutations)
 
-newtype Repository = RepositoryT { unRepo :: D.DGraph Commit () } deriving stock (Show)
-data Commit = CommitT { commitSHA :: !Text, commitParents :: [Commit] } deriving stock (Show)
+data SHA = SHA Text | SHAH Int deriving (Show, Eq)
+instance H.Hashable SHA where
+    hashWithSalt s sha = case sha of
+        SHA t -> H.hashWithSalt s t
+        SHAH i -> i
 
-instance H.Hashable Commit where
-    hashWithSalt s = H.hashWithSalt s . commitSHA
+newtype Repository = R {unRepo :: D.DGraph Int ()} deriving Show
 
-instance Ord Commit where
-    compare c1 c2 = compare (commitSHA c1) (commitSHA c2)
+numChildren :: Repository -> SHA -> Int
+numChildren r s = D.vertexIndegree (unRepo r) (H.hash s)
 
-instance Eq Commit where
-    (==) c1 c2 = commitSHA c1 == commitSHA c2
+numParents :: Repository -> SHA -> Int
+numParents r s = D.vertexOutdegree  (unRepo r)  (H.hash s)
 
-isDirectAncestor :: Commit -> Commit -> Maybe [Commit]
-isDirectAncestor c1 c2 =
-    let isDirectAncestor' ci1@(CommitT s1 []    ) (CommitT s2 _) Nothing = if s1 == s2 then Just [ci1] else Nothing
-        isDirectAncestor' ci1@(CommitT s1 []    ) (CommitT s2 _) (Just g)  = if s1 == s2 then Just (ci1:g) else Nothing
-        isDirectAncestor' ci1@(CommitT s1 ls1   ) ci2@(CommitT s2 _) acc 
-            | s1 == s2 = Just $  ci1 : fromMaybe [] acc
-            | otherwise = 
-                let sPath = ci1 : fromMaybe [] acc
-                in msum [isDirectAncestor' p ci2 (Just sPath) | p <- ls1]                      
-    in
-        isDirectAncestor' c1 c2 Nothing 
+count :: Repository -> Int
+count = G.order . unRepo
 
-hasParent :: Repository -> Commit -> Commit -> Bool
-hasParent r = GC.areConnected (unRepo r)
+isChildOf :: Repository -> SHA -> SHA -> Bool
+isChildOf r x y = T.isConnected () (unRepo r) (H.hash x) (H.hash y)
 
-numChildren :: Repository -> Commit -> Int
-numChildren r = D.vertexIndegree (unRepo r)
-
-numParents :: Repository -> Commit -> Int
-numParents r = D.vertexOutdegree (unRepo r)
-
-commitCount :: Repository -> Int
-commitCount = G.order . unRepo
-
-peekLatestCommit :: Repository -> Maybe Commit
-peekLatestCommit r = case G.vertices (unRepo r) of
-    [] -> Nothing
-    cs -> Just (maximum cs)
-
-fromCommitList :: [Commit] -> Repository
-fromCommitList cts = 
-    let fromCommitList' [] acc = RepositoryT acc
-        fromCommitList' (c:cs) acc = fromCommitList' cs (case commitParents c of
-            [] -> G.insertVertex c acc
-            cps -> G.insertEdgePairs ((c,) <$> cps) acc)
-    in fromCommitList' cts G.empty
+peekRepo :: Repository -> Maybe SHA
+peekRepo r = fmap SHAH (T.peek (unRepo r))
 
 
-instance Q.Arbitrary Repository where
+repoFromList :: [(SHA, [SHA])] -> Repository
+repoFromList ls = 
+    let converted = map (\(x, xs) -> (H.hash x, map (\y -> (H.hash y, ())) xs)) ls in
+    R $ G.fromList converted
+
+instance Arbitrary Repository where
     arbitrary = do
-        strList <- Q.listOf (Q.arbitrary `Q.suchThat` (\c -> length c <= 8) :: Q.Gen String) 
-        let subseqs = Data.List.take (length strList) (Data.List.permutations strList)
-        let commits = Data.List.zipWith (\x y -> CommitT x (CommitT <$> y <*> [])) (pack <$> strList) (fmap (fmap pack) subseqs)
-        return $ fromCommitList commits
+        g <- arbitrary :: Gen (D.DGraph Int ())
+        return $ R g
 
-instance Q.Arbitrary Commit where
-    arbitrary = do
-        textList <- Q.arbitrary :: Q.Gen [String]
-        currSha <- Q.arbitrary `Q.suchThat` (/=) [] :: Q.Gen String
-        return $ CommitT (pack currSha) (CommitT <$> map pack textList <*> [])
+
+

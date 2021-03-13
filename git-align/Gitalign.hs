@@ -5,21 +5,16 @@ module Gitalign
     ) where
 import Gitalign.Types
     (
-        Repository(RepositoryT, unRepo)
-        , Commit(CommitT, commitSHA, commitParents)
-        , fromCommitList
+        Repository(unRepo)
+        , repoFromList 
+        , SHA(..)
         , numParents
         , numChildren
-        , hasParent
-        , commitCount
-        , peekLatestCommit
-        , isDirectAncestor
+        , count
+        , isChildOf
+        , peekRepo
     )
 
 import Gitalign.Parsing 
     (
-        shaFromDirectoryParser,
-        parseSHA,
-        parseCommits,
-        parseCommitLine
     )
