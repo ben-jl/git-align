@@ -5,7 +5,7 @@ module Gitalign
     ) where
 import Gitalign.Types
     (
-        Repository()
+        Repository(unRepo)
         , repoFromList 
         , SHA(..)
         , numParents
